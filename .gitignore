@@ -1,0 +1,15 @@
+# use glob syntax.
+syntax: glob
+
+*~
+\#*
+.\#*
+_build/*
+example/*
+*.exe
+*.bc
+exam_j.*
+exam_t.*
+.hgignore
+dune-project
+multiTest.install

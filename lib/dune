@@ -1,0 +1,16 @@
+(rule
+  (targets exam_j.ml exam_j.mli)
+  (deps    exam.atd)
+  (mode    fallback)
+  (action  (run atdgen -j %{deps})))
+
+(rule
+  (targets exam_t.ml exam_t.mli)
+  (deps    exam.atd)
+  (mode    fallback)
+  (action  (run atdgen -t %{deps})))
+
+(library
+  (name lib)
+  (libraries core yojson atdgen))
+

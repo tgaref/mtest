@@ -1,0 +1,11 @@
+opam-version: "2.0.1"
+name: "multiTest"
+version: "0.1"
+synopsis: "A multiple choice test generator"
+description: "A command line tool for generating multiple choice tests."
+maintainer: "Theo <tgaref@gmail.com>"
+authors: "Theo <tgaref@gmail.com>"
+license: "Free"
+homepage: "None"
+depends: [ "ocaml" "ocamlfind" ]
+build: ["dune" "build" "-p" name]

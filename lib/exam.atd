@@ -1,0 +1,54 @@
+type answer = { ans     : string;
+                correct : bool;
+              } <ocaml field_refix = "exam_a_">
+
+type question = { name      : string;
+                  statement : string;
+		  answers   : answer list;
+		 ?parent    : string option;
+		} <ocaml field_prefix = "exam_q_">
+                  
+
+type group = { name      : string;
+               questions : question list;
+	     } <ocaml field_prefix = "exam_g_">
+
+type exam = { name   : string;
+              footer : string;
+              groups : group list;
+	    } <ocaml field_prefix = "exam_e_">
+
+
+type groupProfile = {name      : string;
+                     num       : int;
+		     saveSpace : bool;
+		    } <ocaml field_prefix="prof_g_">
+
+type examProfile = { totalNum  : int;
+                     seed      : string;
+                     profile   : groupProfile list;
+		   } <ocaml field_prefix="prof_e_">
+
+
+type groupMarks = { name    : string;
+                    negmark : float;
+		    posmark : float;
+		  } <ocaml field_prefix="prof_mark_g_">
+
+type markProfile = groupMarks list
+
+
+type testPaper = {serial    : int;
+                  questions : question list;
+		 } <ocaml field_prefix="paper_">
+
+
+type testPapers = testPaper list
+
+type assoc = { serial   : string;
+               groups   : string list;
+	       correct  : string list;
+	     } <ocaml field_prefix="assoc_">
+
+type assocList = assoc list
+

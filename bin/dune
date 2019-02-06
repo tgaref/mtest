@@ -1,0 +1,5 @@
+(executable
+  (name mtest)
+  (libraries lib core)
+  (public_name mtest)
+  (preprocess (pps ppx_jane)))
