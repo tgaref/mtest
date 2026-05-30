@@ -12,9 +12,7 @@ let testPapersTex = "TEST_PAPERS.tex"
 
 let testPapersF = "_testPapers_"
 
-let examF = "_exam_"
-
-let assocF = "_assocList_"
+let assocF = "_correctAnswers.json"
 
 let correctAnswersCSV = "CORRECT_ANSWERS.csv"
 

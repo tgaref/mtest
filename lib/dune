@@ -12,5 +12,5 @@
 
 (library
   (name lib)
-  (libraries core yojson atdgen))
+  (libraries core yojson atdgen-runtime))
 

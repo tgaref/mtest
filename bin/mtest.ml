@@ -5,11 +5,11 @@ open Core
 let regular_file =
   Command.Spec.Arg_type.create
     (fun filename ->
-     match Sys.is_file filename with
-     | `Yes -> filename
-     | `No | `Unknown ->
-	      eprintf "File '%s' does not exist\n%!" filename;
-              exit 1
+     if Stdlib.Sys.file_exists filename then
+       filename
+     else
+       (eprintf "File '%s' does not exist\n%!" filename;
+        exit 1)
   )
 
 let profile =
@@ -39,6 +39,15 @@ let mark =
     Lib.Mark.mark filename
   )
 
+let backup =
+  Command.basic
+  ~summary: "Backup exam files using [File]"
+  Command.Let_syntax.(
+    let%map_open filename = anon ("questions file" %: regular_file) in
+    fun () ->
+    Lib.Backup.backup filename
+  )
+
   
 let command =
   Command.group
@@ -46,8 +55,9 @@ let command =
   ~readme:(fun () -> "A tool for creating and marking multiple choice tests")
   [ "profile", profile
   ; "create", create
-  ; "mark", mark]
+  ; "mark", mark
+  ; "backup", backup]
 
 let () =
-  Command.run ~version:"0.1" ~build_info:"TG" command
+  Command_unix.run ~version:"0.1" ~build_info:"TG" command
 

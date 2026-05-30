@@ -4,7 +4,7 @@ open Core
 
 let writeTexFiles exam papers examProf =
   let buildAssoc examProf =
-  List.map examProf.Exam_j.prof_e_profile
+    List.map examProf.Exam_j.prof_e_profile
 	   ~f:(fun grp_prof ->
 	       (grp_prof.Exam_j.prof_g_name, grp_prof.Exam_j.prof_g_saveSpace)
 	      ) in
@@ -18,22 +18,28 @@ let writeTexFiles exam papers examProf =
   fprintf outh "\\pagestyle{empty} \n";
   fprintf outh "\\begin{document} \n";
   fprintf outh "\\maketitle \n";
-  List.iter exam.Exam_j.exam_e_groups
-	   ~f:(fun grp ->
-	       fprintf outh "\\flushleft \\underline{\\bf %s} \n" grp.Exam_j.exam_g_name;
-               fprintf outh "\\begin{enumerate} \n";
-	       List.iter grp.Exam_j.exam_g_questions
-			 ~f:(fun qst ->
-			     fprintf outh "\\item %s \n" qst.Exam_j.exam_q_statement;
-                             fprintf outh "\\begin{enumerate} \n";
-			     List.iter qst.Exam_j.exam_q_answers
-				       ~f:(fun a ->
-					   fprintf outh "\\item (%s)    %s\n" (Bool.to_string a.Exam_j.correct) a.Exam_j.ans
-					  );
-			     fprintf outh "\\end{enumerate} \n"
-			    );
-	       fprintf outh "\\end{enumerate} \n"
-	      );
+
+  let questions_by_group =
+    List.fold exam.Exam_j.exam_e_questions ~init:(Map.empty (module String)) ~f:(fun acc q ->
+      Map.add_multi acc ~key:q.Exam_j.exam_q_group ~data:q
+    )
+  in
+
+  Map.iteri questions_by_group ~f:(fun ~key:group_name ~data:questions ->
+    fprintf outh "\\flushleft \\underline{\\bf %s} \n" group_name;
+    fprintf outh "\\begin{enumerate} \n";
+    List.iter questions
+	       ~f:(fun qst ->
+		   fprintf outh "\\item %s \n" qst.Exam_j.exam_q_statement;
+                   fprintf outh "\\begin{enumerate} \n";
+		   List.iter qst.Exam_j.exam_q_answers
+			     ~f:(fun a ->
+				 fprintf outh "\\item (%s)    %s\n" (Bool.to_string a.Exam_j.correct) a.Exam_j.ans
+				);
+		   fprintf outh "\\end{enumerate} \n"
+		  );
+    fprintf outh "\\end{enumerate} \n"
+  );
   fprintf outh "\\end{document}";
   Out_channel.close outh;
 
@@ -82,11 +88,7 @@ let writeTexFiles exam papers examProf =
 		List.iter paper.Exam_j.paper_questions
 			  ~f:(fun qst ->
 			      fprintf outh "\\item %s \n" qst.Exam_j.exam_q_statement;
-			      let parent_grp =
-				match qst.Exam_j.exam_q_parent with
-				| None -> eprintf "Internal problem: no group name associated with question...";
-					  exit 1
-				| Some parent -> parent in
+			      let parent_grp = qst.Exam_j.exam_q_group in
 			      let save = List.Assoc.find_exn assoc_list ~equal:(String.equal) parent_grp in
 			      match save with
 			      | false -> fprintf outh "\\begin{enumerate}[(1)] \n";
@@ -115,12 +117,12 @@ let writeTexFiles exam papers examProf =
   Out_channel.close outh
 
 let latexStuff tex_file =
-  let e=Sys.command ("xelatex --halt-on-error "^tex_file) in
+  let e=Stdlib.Sys.command ("xelatex --halt-on-error "^tex_file) in
   match e with
-  |0 -> Sys.remove ((List.hd_exn (String.split ~on:'.' tex_file))^".aux");
-	Sys.remove ((List.hd_exn (String.split ~on:'.' tex_file))^".log");
+  |0 -> Stdlib.Sys.remove ((List.hd_exn (String.split ~on:'.' tex_file))^".aux");
+	Stdlib.Sys.remove ((List.hd_exn (String.split ~on:'.' tex_file))^".log");
 	()
-  |_ -> Sys.remove ((List.hd_exn (String.split ~on:'.' tex_file))^".aux");
-	Sys.remove ((List.hd_exn (String.split ~on:'.' tex_file))^".log");
+  |_ -> Stdlib.Sys.remove ((List.hd_exn (String.split ~on:'.' tex_file))^".aux");
+	Stdlib.Sys.remove ((List.hd_exn (String.split ~on:'.' tex_file))^".log");
         eprintf "Your latex file, %s ,is not properly formated." tex_file;
 	exit 1

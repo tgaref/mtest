@@ -1,5 +1,5 @@
 (executable
   (name mtest)
-  (libraries lib core)
+  (libraries lib core core_unix core_unix.command_unix)
   (public_name mtest)
   (preprocess (pps ppx_jane)))

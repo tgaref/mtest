@@ -1,21 +1,15 @@
 type answer = { ans     : string;
                 correct : bool;
-              } <ocaml field_refix = "exam_a_">
+              }
 
-type question = { name      : string;
+type question = { group     : string;
                   statement : string;
 		  answers   : answer list;
-		 ?parent    : string option;
 		} <ocaml field_prefix = "exam_q_">
-                  
 
-type group = { name      : string;
-               questions : question list;
-	     } <ocaml field_prefix = "exam_g_">
-
-type exam = { name   : string;
-              footer : string;
-              groups : group list;
+type exam = { name      : string;
+              footer    : string;
+              questions : question list;
 	    } <ocaml field_prefix = "exam_e_">
 
 
@@ -45,10 +39,8 @@ type testPaper = {serial    : int;
 
 type testPapers = testPaper list
 
-type assoc = { serial   : string;
-               groups   : string list;
-	       correct  : string list;
-	     } <ocaml field_prefix="assoc_">
+type correctAns = { serial  : string;
+                    answers : (string * string) list;
+                  } <ocaml field_prefix="corr_">
 
-type assocList = assoc list
-
+type correctAnsList = correctAns list
