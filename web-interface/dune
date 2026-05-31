@@ -1,0 +1,4 @@
+(executable
+  (name server)
+  (public_name multiTest-web)
+  (libraries core yume eio_main lib))
