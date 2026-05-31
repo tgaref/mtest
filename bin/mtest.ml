@@ -25,18 +25,20 @@ let create =
   Command.basic
   ~summary: "Create test papers using [File]"
   Command.Let_syntax.(
-    let%map_open filename = anon ("questions file" %: regular_file) in
+    let%map_open filename = anon ("questions file" %: regular_file)
+    and dest_dir = flag "-dest" (optional string) ~doc:"DIR Output directory for generated files" in
     fun () ->
-    Lib.Create.create filename
+    Lib.Create.create ?dest_dir filename
   )
 
 let mark =
   Command.basic
   ~summary: "Mark test papers using [File]"
   Command.Let_syntax.(
-    let%map_open filename = anon ("questions file" %: regular_file) in
+    let%map_open filename = anon ("questions file" %: regular_file)
+    and dest_dir = flag "-dest" (optional string) ~doc:"DIR Output directory for grading files" in
     fun () ->
-    Lib.Mark.mark filename
+    Lib.Mark.mark ?dest_dir filename
   )
 
 let backup =

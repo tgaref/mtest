@@ -63,9 +63,14 @@ let buildCorrectAnswers papers =
 	      )
 
 
-let create file =
+let create ?dest_dir file =
+  let resolve_path path =
+    match dest_dir with
+    | Some dir -> Stdlib.Filename.concat dir path
+    | None -> path
+  in
   let info = Common.readFile file in
-  let info'= Common.readFile Common.examProfileF in
+  let info'= Common.readFile (resolve_path Common.examProfileF) in
   let exam = try Exam_j.exam_of_string info with
 	      | Yojson.Json_error _ -> eprintf "File %s is not a proper .json file.\n" file;
 					       exit 1 in
@@ -82,10 +87,13 @@ let create file =
     [serial; String.concat ans_strs]
   ) in
 				      
-  Common.writeFile Common.testPapersF data_papers; 
-  Common.writeFile Common.assocF data_correct_ans_json;
-  Common.writeCSV Common.correctAnswersCSV data_correct_ans_csv;
-  Latex.writeTexFiles exam testPapers examProf;
-  Latex.latexStuff Common.allQuestionsTex;
-  Latex.latexStuff Common.testPapersTex;
+  Common.writeFile (resolve_path Common.testPapersF) data_papers; 
+  Common.writeFile (resolve_path Common.assocF) data_correct_ans_json;
+  Common.writeCSV (resolve_path Common.correctAnswersCSV) data_correct_ans_csv;
+  (* Latex.writeTexFiles ?dest_dir exam testPapers examProf;
+  Latex.latexStuff ?dest_dir Common.allQuestionsTex;
+  Latex.latexStuff ?dest_dir Common.testPapersTex; *)
+  Typst.writeTypstFiles ?dest_dir exam testPapers examProf;
+  Typst.typstStuff ?dest_dir "ALL_QUESTIONS.typ";
+  Typst.typstStuff ?dest_dir "TEST_PAPERS.typ";
   printf "\n Done!\n"

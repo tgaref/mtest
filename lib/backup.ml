@@ -22,6 +22,9 @@ let backup questions_file =
     Common.assocF;
     Common.allQuestionsTex;
     Common.latexPreampleF;
+    "ALL_QUESTIONS.typ";
+    "TEST_PAPERS.typ";
+    "_typstPreamble_";
   ] in
 
   List.iter filenames ~f:(fun f ->

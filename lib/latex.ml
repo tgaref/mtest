@@ -2,15 +2,28 @@
 
 open Core
 
-let writeTexFiles exam papers examProf =
+let writeTexFiles ?dest_dir exam papers examProf =
+  let resolve_path path =
+    match dest_dir with
+    | Some dir -> Stdlib.Filename.concat dir path
+    | None -> path
+  in
   let buildAssoc examProf =
     List.map examProf.Exam_j.prof_e_profile
 	   ~f:(fun grp_prof ->
 	       (grp_prof.Exam_j.prof_g_name, grp_prof.Exam_j.prof_g_saveSpace)
 	      ) in
   let assoc_list = buildAssoc examProf in
-  let latex_pre_handle = In_channel.create Common.latexPreampleF in
-  let outh = Out_channel.create Common.allQuestionsTex in
+  let latex_pre_path =
+    match dest_dir with
+    | Some dir when Stdlib.Sys.file_exists (Stdlib.Filename.concat dir Common.latexPreampleF) ->
+        Stdlib.Filename.concat dir Common.latexPreampleF
+    | _ ->
+        if Stdlib.Sys.file_exists Common.latexPreampleF then Common.latexPreampleF
+        else "example/_latexPreample_"
+  in
+  let latex_pre_handle = In_channel.create latex_pre_path in
+  let outh = Out_channel.create (resolve_path Common.allQuestionsTex) in
   List.iter (In_channel.input_lines latex_pre_handle)
 	    ~f:(fun line -> fprintf outh "%s\n" line);
   In_channel.close latex_pre_handle;
@@ -43,8 +56,8 @@ let writeTexFiles exam papers examProf =
   fprintf outh "\\end{document}";
   Out_channel.close outh;
 
-  let latex_pre_handle = In_channel.create Common.latexPreampleF in
-  let outh = Out_channel.create Common.testPapersTex in
+  let latex_pre_handle = In_channel.create latex_pre_path in
+  let outh = Out_channel.create (resolve_path Common.testPapersTex) in
   List.iter (In_channel.input_lines latex_pre_handle)
 	    ~f:(fun line -> fprintf outh "%s\n" line);
   In_channel.close latex_pre_handle;
@@ -116,13 +129,27 @@ let writeTexFiles exam papers examProf =
   
   Out_channel.close outh
 
-let latexStuff tex_file =
-  let e=Stdlib.Sys.command ("xelatex --halt-on-error "^tex_file) in
-  match e with
-  |0 -> Stdlib.Sys.remove ((List.hd_exn (String.split ~on:'.' tex_file))^".aux");
-	Stdlib.Sys.remove ((List.hd_exn (String.split ~on:'.' tex_file))^".log");
-	()
-  |_ -> Stdlib.Sys.remove ((List.hd_exn (String.split ~on:'.' tex_file))^".aux");
-	Stdlib.Sys.remove ((List.hd_exn (String.split ~on:'.' tex_file))^".log");
-        eprintf "Your latex file, %s ,is not properly formated." tex_file;
-	exit 1
+let latexStuff ?dest_dir tex_file =
+  let cmd =
+    match dest_dir with
+    | Some dir ->
+        Printf.sprintf "xelatex --halt-on-error -output-directory=%s %s" dir (Stdlib.Filename.concat dir tex_file)
+    | None ->
+        "xelatex --halt-on-error " ^ tex_file
+  in
+  let e = Stdlib.Sys.command cmd in
+  let prefix =
+    let base = List.hd_exn (String.split ~on:'.' tex_file) in
+    match dest_dir with
+    | Some dir -> Stdlib.Filename.concat dir base
+    | None -> base
+  in
+  let safe_remove path =
+    try if Stdlib.Sys.file_exists path then Stdlib.Sys.remove path with _ -> ()
+  in
+  safe_remove (prefix ^ ".aux");
+  safe_remove (prefix ^ ".log");
+  if e <> 0 then (
+    eprintf "Your latex file, %s, is not properly formatted." tex_file;
+    exit 1
+  )
